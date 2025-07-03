@@ -41,6 +41,8 @@ const AddPredictionModal = ({ isOpen, onClose, onAdd }: AddPredictionModalProps)
       predictionDate,
       audioUrl: audioFile ? URL.createObjectURL(audioFile) : undefined,
       videoUrl: videoFile ? URL.createObjectURL(videoFile) : undefined,
+      likes: 0,
+      isLiked: false
     };
 
     onAdd(newPrediction);
