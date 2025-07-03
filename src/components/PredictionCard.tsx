@@ -1,15 +1,17 @@
 
 import { format } from "date-fns";
-import { Calendar, User, FileAudio, FileVideo } from "lucide-react";
+import { Calendar, User, FileAudio, FileVideo, Heart } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Prediction } from "@/pages/Index";
 
 interface PredictionCardProps {
   prediction: Prediction;
+  onLike: () => void;
 }
 
-const PredictionCard = ({ prediction }: PredictionCardProps) => {
+const PredictionCard = ({ prediction, onLike }: PredictionCardProps) => {
   const daysUntilPrediction = Math.ceil(
     (prediction.predictionDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
   );
@@ -55,7 +57,7 @@ const PredictionCard = ({ prediction }: PredictionCardProps) => {
           {prediction.summary}
         </p>
 
-        {/* Footer with Prediction Date - Mobile optimized */}
+        {/* Footer with Prediction Date and Like Button */}
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-1.5 sm:gap-2 text-blue-600/70 min-w-0 flex-1">
             <Calendar className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
@@ -64,22 +66,50 @@ const PredictionCard = ({ prediction }: PredictionCardProps) => {
             </span>
           </div>
           
-          <Badge 
-            variant={isPastDue ? "destructive" : isComingSoon ? "default" : "secondary"}
-            className={`
-              text-xs px-2 py-1 whitespace-nowrap
-              ${isPastDue ? "bg-red-100 text-red-700 hover:bg-red-100" : ""}
-              ${isComingSoon ? "bg-yellow-100 text-yellow-700 hover:bg-yellow-100" : ""}
-              ${!isPastDue && !isComingSoon ? "bg-blue-100 text-blue-700 hover:bg-blue-100" : ""}
-            `}
-          >
-            {isPastDue 
-              ? `${Math.abs(daysUntilPrediction)}d ago`
-              : daysUntilPrediction === 0
-                ? "Today!"
-                : `${daysUntilPrediction}d left`
-            }
-          </Badge>
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={(e) => {
+                e.stopPropagation();
+                onLike();
+              }}
+              variant="ghost"
+              size="sm"
+              className={`
+                p-2 h-auto min-w-0 rounded-full transition-all duration-200 hover:scale-110 active:scale-95
+                ${prediction.isLiked 
+                  ? "text-red-500 hover:text-red-600 hover:bg-red-50" 
+                  : "text-gray-400 hover:text-red-500 hover:bg-red-50"
+                }
+              `}
+            >
+              <Heart 
+                className={`w-4 h-4 ${prediction.isLiked ? "fill-current" : ""}`} 
+              />
+            </Button>
+            
+            {prediction.likes > 0 && (
+              <span className="text-xs text-gray-500 font-medium">
+                {prediction.likes}
+              </span>
+            )}
+            
+            <Badge 
+              variant={isPastDue ? "destructive" : isComingSoon ? "default" : "secondary"}
+              className={`
+                text-xs px-2 py-1 whitespace-nowrap
+                ${isPastDue ? "bg-red-100 text-red-700 hover:bg-red-100" : ""}
+                ${isComingSoon ? "bg-yellow-100 text-yellow-700 hover:bg-yellow-100" : ""}
+                ${!isPastDue && !isComingSoon ? "bg-blue-100 text-blue-700 hover:bg-blue-100" : ""}
+              `}
+            >
+              {isPastDue 
+                ? `${Math.abs(daysUntilPrediction)}d ago`
+                : daysUntilPrediction === 0
+                  ? "Today!"
+                  : `${daysUntilPrediction}d left`
+              }
+            </Badge>
+          </div>
         </div>
       </CardContent>
     </Card>

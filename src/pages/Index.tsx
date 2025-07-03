@@ -14,6 +14,8 @@ export interface Prediction {
   predictionDate: Date;
   audioUrl?: string;
   videoUrl?: string;
+  likes: number;
+  isLiked: boolean;
 }
 
 const Index = () => {
@@ -25,7 +27,9 @@ const Index = () => {
       avatar: "https://images.unsplash.com/photo-1535268647677-300dbf3d78d1?w=150&h=150&fit=crop&crop=face",
       startDate: new Date("2024-01-15"),
       predictionDate: new Date("2024-12-31"),
-      audioUrl: "sample-audio.mp3"
+      audioUrl: "sample-audio.mp3",
+      likes: 12,
+      isLiked: false
     },
     {
       id: "2", 
@@ -34,7 +38,9 @@ const Index = () => {
       avatar: "https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=150&h=150&fit=crop&crop=face",
       startDate: new Date("2024-02-01"),
       predictionDate: new Date("2025-06-01"),
-      videoUrl: "sample-video.mp4"
+      videoUrl: "sample-video.mp4",
+      likes: 8,
+      isLiked: true
     },
     {
       id: "3",
@@ -42,18 +48,35 @@ const Index = () => {
       author: "Marcus Rodriguez",
       avatar: "https://images.unsplash.com/photo-1582562124811-c09040d0a901?w=150&h=150&fit=crop&crop=face",
       startDate: new Date("2024-03-10"),
-      predictionDate: new Date("2026-01-01")
+      predictionDate: new Date("2026-01-01"),
+      likes: 24,
+      isLiked: false
     }
   ]);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const addPrediction = (newPrediction: Omit<Prediction, "id">) => {
+  const addPrediction = (newPrediction: Omit<Prediction, "id" | "likes" | "isLiked">) => {
     const prediction: Prediction = {
       ...newPrediction,
-      id: Date.now().toString()
+      id: Date.now().toString(),
+      likes: 0,
+      isLiked: false
     };
     setPredictions([prediction, ...predictions]);
+  };
+
+  const handleLike = (predictionId: string) => {
+    setPredictions(predictions.map(prediction => {
+      if (prediction.id === predictionId) {
+        return {
+          ...prediction,
+          likes: prediction.isLiked ? prediction.likes - 1 : prediction.likes + 1,
+          isLiked: !prediction.isLiked
+        };
+      }
+      return prediction;
+    }));
   };
 
   return (
@@ -92,7 +115,10 @@ const Index = () => {
                 className="animate-fade-in"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
-                <PredictionCard prediction={prediction} />
+                <PredictionCard 
+                  prediction={prediction} 
+                  onLike={() => handleLike(prediction.id)}
+                />
               </div>
             ))}
           </div>
@@ -109,7 +135,6 @@ const Index = () => {
         </Button>
       </div>
 
-      {/* Add Prediction Modal */}
       <AddPredictionModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
