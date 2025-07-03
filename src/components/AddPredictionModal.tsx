@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { format } from "date-fns";
 import { Calendar, CalendarIcon, FileAudio, FileVideo, X } from "lucide-react";
@@ -15,10 +14,11 @@ import { Prediction } from "@/pages/Index";
 interface AddPredictionModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAdd: (prediction: Omit<Prediction, "id">) => void;
+  onAdd: (prediction: Omit<Prediction, "id" | "likes" | "isLiked" | "challenges">) => void;
+  isChallenge?: boolean;
 }
 
-const AddPredictionModal = ({ isOpen, onClose, onAdd }: AddPredictionModalProps) => {
+const AddPredictionModal = ({ isOpen, onClose, onAdd, isChallenge = false }: AddPredictionModalProps) => {
   const [summary, setSummary] = useState("");
   const [author, setAuthor] = useState("");
   const [avatar, setAvatar] = useState("");
@@ -33,7 +33,7 @@ const AddPredictionModal = ({ isOpen, onClose, onAdd }: AddPredictionModalProps)
       return;
     }
 
-    const newPrediction: Omit<Prediction, "id"> = {
+    const newPrediction: Omit<Prediction, "id" | "likes" | "isLiked" | "challenges"> = {
       summary,
       author,
       avatar: avatar || "https://images.unsplash.com/photo-1535268647677-300dbf3d78d1?w=150&h=150&fit=crop&crop=face",
@@ -41,8 +41,6 @@ const AddPredictionModal = ({ isOpen, onClose, onAdd }: AddPredictionModalProps)
       predictionDate,
       audioUrl: audioFile ? URL.createObjectURL(audioFile) : undefined,
       videoUrl: videoFile ? URL.createObjectURL(videoFile) : undefined,
-      likes: 0,
-      isLiked: false
     };
 
     onAdd(newPrediction);
@@ -72,18 +70,23 @@ const AddPredictionModal = ({ isOpen, onClose, onAdd }: AddPredictionModalProps)
       <DialogContent className="max-w-md mx-auto bg-white/95 backdrop-blur-sm border-0 shadow-xl">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-center bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            🔮 New Prediction
+            {isChallenge ? '⚡ Challenge Prediction' : '🔮 New Prediction'}
           </DialogTitle>
+          {isChallenge && (
+            <p className="text-center text-orange-600 text-sm mt-2">
+              Make a counter-prediction to challenge this view
+            </p>
+          )}
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="summary" className="text-blue-900 font-medium">
-              What do you predict?
+              {isChallenge ? "What's your counter-prediction?" : "What do you predict?"}
             </Label>
             <Textarea
               id="summary"
-              placeholder="Share your prediction about the future..."
+              placeholder={isChallenge ? "Share your opposing view..." : "Share your prediction about the future..."}
               value={summary}
               onChange={(e) => setSummary(e.target.value)}
               className="border-blue-200 focus:border-blue-400 focus:ring-blue-200 resize-none"
@@ -219,9 +222,13 @@ const AddPredictionModal = ({ isOpen, onClose, onAdd }: AddPredictionModalProps)
             </Button>
             <Button
               type="submit"
-              className="flex-1 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+              className={`flex-1 text-white shadow-lg hover:shadow-xl transition-all duration-300 ${
+                isChallenge 
+                  ? "bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600" 
+                  : "bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
+              }`}
             >
-              Add Prediction
+              {isChallenge ? 'Add Challenge' : 'Add Prediction'}
             </Button>
           </div>
         </form>

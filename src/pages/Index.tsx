@@ -16,6 +16,8 @@ export interface Prediction {
   videoUrl?: string;
   likes: number;
   isLiked: boolean;
+  parentId?: string; // For challenge threads
+  challenges?: Prediction[]; // Child predictions
 }
 
 const Index = () => {
@@ -29,7 +31,8 @@ const Index = () => {
       predictionDate: new Date("2024-12-31"),
       audioUrl: "sample-audio.mp3",
       likes: 12,
-      isLiked: false
+      isLiked: false,
+      challenges: []
     },
     {
       id: "2", 
@@ -40,7 +43,8 @@ const Index = () => {
       predictionDate: new Date("2025-06-01"),
       videoUrl: "sample-video.mp4",
       likes: 8,
-      isLiked: true
+      isLiked: true,
+      challenges: []
     },
     {
       id: "3",
@@ -50,33 +54,85 @@ const Index = () => {
       startDate: new Date("2024-03-10"),
       predictionDate: new Date("2026-01-01"),
       likes: 24,
-      isLiked: false
+      isLiked: false,
+      challenges: []
     }
   ]);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [challengingPredictionId, setChallengingPredictionId] = useState<string | null>(null);
 
-  const addPrediction = (newPrediction: Omit<Prediction, "id" | "likes" | "isLiked">) => {
+  const addPrediction = (newPrediction: Omit<Prediction, "id" | "likes" | "isLiked" | "challenges">) => {
     const prediction: Prediction = {
       ...newPrediction,
       id: Date.now().toString(),
       likes: 0,
-      isLiked: false
+      isLiked: false,
+      challenges: []
     };
-    setPredictions([prediction, ...predictions]);
+
+    if (challengingPredictionId) {
+      // Add as a challenge to existing prediction
+      setPredictions(predictions.map(p => {
+        if (p.id === challengingPredictionId) {
+          return {
+            ...p,
+            challenges: [...(p.challenges || []), { ...prediction, parentId: challengingPredictionId }]
+          };
+        }
+        return p;
+      }));
+      setChallengingPredictionId(null);
+    } else {
+      // Add as new main prediction
+      setPredictions([prediction, ...predictions]);
+    }
   };
 
-  const handleLike = (predictionId: string) => {
-    setPredictions(predictions.map(prediction => {
-      if (prediction.id === predictionId) {
-        return {
-          ...prediction,
-          likes: prediction.isLiked ? prediction.likes - 1 : prediction.likes + 1,
-          isLiked: !prediction.isLiked
-        };
-      }
-      return prediction;
-    }));
+  const handleLike = (predictionId: string, isChallenge = false, parentId?: string) => {
+    if (isChallenge && parentId) {
+      // Handle challenge like
+      setPredictions(predictions.map(prediction => {
+        if (prediction.id === parentId) {
+          return {
+            ...prediction,
+            challenges: prediction.challenges?.map(challenge => {
+              if (challenge.id === predictionId) {
+                return {
+                  ...challenge,
+                  likes: challenge.isLiked ? challenge.likes - 1 : challenge.likes + 1,
+                  isLiked: !challenge.isLiked
+                };
+              }
+              return challenge;
+            })
+          };
+        }
+        return prediction;
+      }));
+    } else {
+      // Handle main prediction like
+      setPredictions(predictions.map(prediction => {
+        if (prediction.id === predictionId) {
+          return {
+            ...prediction,
+            likes: prediction.isLiked ? prediction.likes - 1 : prediction.likes + 1,
+            isLiked: !prediction.isLiked
+          };
+        }
+        return prediction;
+      }));
+    }
+  };
+
+  const handleChallenge = (predictionId: string) => {
+    setChallengingPredictionId(predictionId);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setChallengingPredictionId(null);
   };
 
   return (
@@ -118,7 +174,28 @@ const Index = () => {
                 <PredictionCard 
                   prediction={prediction} 
                   onLike={() => handleLike(prediction.id)}
+                  onChallenge={() => handleChallenge(prediction.id)}
                 />
+                
+                {/* Challenge/Thread Display */}
+                {prediction.challenges && prediction.challenges.length > 0 && (
+                  <div className="ml-4 mt-2 space-y-2 border-l-2 border-blue-200 pl-3">
+                    {prediction.challenges.map((challenge, challengeIndex) => (
+                      <div
+                        key={challenge.id}
+                        className="animate-fade-in"
+                        style={{ animationDelay: `${(index * 0.1) + (challengeIndex * 0.05)}s` }}
+                      >
+                        <PredictionCard
+                          prediction={challenge}
+                          onLike={() => handleLike(challenge.id, true, prediction.id)}
+                          onChallenge={() => handleChallenge(prediction.id)}
+                          isChallenge={true}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -137,8 +214,9 @@ const Index = () => {
 
       <AddPredictionModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={handleCloseModal}
         onAdd={addPrediction}
+        isChallenge={!!challengingPredictionId}
       />
     </div>
   );

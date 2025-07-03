@@ -1,6 +1,6 @@
 
 import { format } from "date-fns";
-import { Calendar, User, FileAudio, FileVideo, Heart } from "lucide-react";
+import { Calendar, User, FileAudio, FileVideo, Heart, MessageSquare } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,9 +9,11 @@ import { Prediction } from "@/pages/Index";
 interface PredictionCardProps {
   prediction: Prediction;
   onLike: () => void;
+  onChallenge: () => void;
+  isChallenge?: boolean;
 }
 
-const PredictionCard = ({ prediction, onLike }: PredictionCardProps) => {
+const PredictionCard = ({ prediction, onLike, onChallenge, isChallenge = false }: PredictionCardProps) => {
   const daysUntilPrediction = Math.ceil(
     (prediction.predictionDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
   );
@@ -20,8 +22,16 @@ const PredictionCard = ({ prediction, onLike }: PredictionCardProps) => {
   const isComingSoon = daysUntilPrediction <= 30 && daysUntilPrediction >= 0;
 
   return (
-    <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-md hover:shadow-lg transition-all duration-300 hover:scale-[1.02] cursor-pointer group active:scale-[0.98] mx-1">
+    <Card className={`bg-white/90 backdrop-blur-sm border-0 shadow-md hover:shadow-lg transition-all duration-300 hover:scale-[1.02] cursor-pointer group active:scale-[0.98] mx-1 ${isChallenge ? 'bg-orange-50/90' : ''}`}>
       <CardContent className="p-4 sm:p-6">
+        {/* Challenge indicator */}
+        {isChallenge && (
+          <div className="flex items-center gap-2 mb-3 text-orange-600 text-xs">
+            <MessageSquare className="w-3 h-3" />
+            <span className="font-medium">Challenge Response</span>
+          </div>
+        )}
+
         {/* Header with Avatar and Author - Mobile optimized */}
         <div className="flex items-center gap-3 mb-3">
           <div className="relative flex-shrink-0">
@@ -57,7 +67,7 @@ const PredictionCard = ({ prediction, onLike }: PredictionCardProps) => {
           {prediction.summary}
         </p>
 
-        {/* Footer with Prediction Date and Like Button */}
+        {/* Footer with Prediction Date and Action Buttons */}
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-1.5 sm:gap-2 text-blue-600/70 min-w-0 flex-1">
             <Calendar className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
@@ -67,6 +77,22 @@ const PredictionCard = ({ prediction, onLike }: PredictionCardProps) => {
           </div>
           
           <div className="flex items-center gap-2">
+            {/* Challenge Button - only show on main predictions */}
+            {!isChallenge && (
+              <Button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onChallenge();
+                }}
+                variant="ghost"
+                size="sm"
+                className="p-2 h-auto min-w-0 rounded-full transition-all duration-200 hover:scale-110 active:scale-95 text-orange-500 hover:text-orange-600 hover:bg-orange-50"
+              >
+                <MessageSquare className="w-4 h-4" />
+              </Button>
+            )}
+
+            {/* Like Button */}
             <Button
               onClick={(e) => {
                 e.stopPropagation();
@@ -111,6 +137,16 @@ const PredictionCard = ({ prediction, onLike }: PredictionCardProps) => {
             </Badge>
           </div>
         </div>
+
+        {/* Challenge count indicator */}
+        {!isChallenge && prediction.challenges && prediction.challenges.length > 0 && (
+          <div className="mt-3 pt-3 border-t border-blue-100">
+            <div className="flex items-center gap-2 text-orange-600 text-xs">
+              <MessageSquare className="w-3 h-3" />
+              <span>{prediction.challenges.length} challenge{prediction.challenges.length > 1 ? 's' : ''}</span>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
