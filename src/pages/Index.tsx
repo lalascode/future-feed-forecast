@@ -57,35 +57,35 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-      {/* Header */}
-      <div className="bg-white/80 backdrop-blur-sm sticky top-0 z-10 border-b border-blue-100">
-        <div className="max-w-2xl mx-auto px-4 py-6">
-          <h1 className="text-3xl font-bold text-center bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 safe-area-inset">
+      {/* Mobile-optimized Header */}
+      <div className="bg-white/90 backdrop-blur-md sticky top-0 z-10 border-b border-blue-100 shadow-sm">
+        <div className="max-w-sm mx-auto px-4 py-4 sm:py-6">
+          <h1 className="text-2xl sm:text-3xl font-bold text-center bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
             🔮 Predictions
           </h1>
-          <p className="text-center text-blue-600/70 mt-2 text-sm">
+          <p className="text-center text-blue-600/70 mt-1 text-xs sm:text-sm">
             Track your future thoughts and ideas
           </p>
         </div>
       </div>
 
-      {/* Predictions Feed */}
-      <div className="max-w-2xl mx-auto px-4 py-6 pb-24">
+      {/* Mobile-optimized Predictions Feed */}
+      <div className="max-w-sm mx-auto px-3 py-4 pb-20 sm:pb-24">
         {predictions.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="text-6xl mb-4">🔮</div>
-            <h3 className="text-xl font-semibold text-blue-700 mb-2">No predictions yet</h3>
-            <p className="text-blue-600/70 mb-6">Start tracking your future thoughts and ideas!</p>
+          <div className="text-center py-8 px-4">
+            <div className="text-5xl mb-4">🔮</div>
+            <h3 className="text-lg font-semibold text-blue-700 mb-2">No predictions yet</h3>
+            <p className="text-blue-600/70 mb-6 text-sm">Start tracking your future thoughts and ideas!</p>
             <Button 
               onClick={() => setIsModalOpen(true)}
-              className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white px-8 py-3 rounded-full font-medium shadow-lg hover:shadow-xl transition-all duration-300"
+              className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white px-6 py-3 rounded-full font-medium shadow-lg hover:shadow-xl transition-all duration-300 text-sm"
             >
               Make Your First Prediction
             </Button>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {predictions.map((prediction, index) => (
               <div 
                 key={prediction.id}
@@ -99,13 +99,13 @@ const Index = () => {
         )}
       </div>
 
-      {/* Floating Action Button */}
-      <div className="fixed bottom-6 right-6 z-20">
+      {/* Mobile-optimized Floating Action Button */}
+      <div className="fixed bottom-4 right-4 z-20 sm:bottom-6 sm:right-6">
         <Button
           onClick={() => setIsModalOpen(true)}
-          className="w-14 h-14 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110"
+          className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 active:scale-95"
         >
-          <Plus className="w-6 h-6" />
+          <Plus className="w-5 h-5 sm:w-6 sm:h-6" />
         </Button>
       </div>
 
